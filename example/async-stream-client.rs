@@ -7,6 +7,8 @@ mod protocols;
 mod utils;
 #[cfg(unix)]
 use protocols::asynchronous::{empty, streaming, streaming_ttrpc};
+use std::time::Duration;
+use tokio::time::sleep;
 use ttrpc::context::{self, Context};
 #[cfg(unix)]
 use ttrpc::r#async::Client;
@@ -48,6 +50,8 @@ async fn main() {
     let t7 = tokio::spawn(echo_default_value(sc1));
 
     let t8 = tokio::spawn(server_send_stream(sc));
+
+    let _ = sleep(Duration::from_secs(10));
 
     let (r1, r2, r3, r4, r5, r6, r7, r8) = tokio::join!(t1, t2, t3, t4, t5, t6, t7, t8);
 
@@ -226,10 +230,12 @@ async fn server_send_stream(cli: streaming_ttrpc::StreamingClient) {
         .await
         .unwrap();
 
-    let mut seq = 0;
-    while let Some(received) = stream.recv().await.unwrap() {
-        assert_eq!(received.seq, seq);
-        assert_eq!(received.msg, "hello");
-        seq += 1;
-    }
+    tokio::spawn(async move {
+        let mut seq = 0;
+        while let Some(received) = stream.recv().await.unwrap() {
+            assert_eq!(received.seq, seq);
+            assert_eq!(received.msg, "hello");
+            seq += 1;
+        }
+    });
 }
