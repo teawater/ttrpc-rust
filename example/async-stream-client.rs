@@ -51,7 +51,7 @@ async fn main() {
 
     let t8 = tokio::spawn(server_send_stream(sc));
 
-    let _ = sleep(Duration::from_secs(10));
+    sleep(Duration::from_secs(10)).await;
 
     let (r1, r2, r3, r4, r5, r6, r7, r8) = tokio::join!(t1, t2, t3, t4, t5, t6, t7, t8);
 
