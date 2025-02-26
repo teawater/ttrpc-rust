@@ -10,6 +10,7 @@ use protocols::asynchronous::{empty, streaming, streaming_ttrpc};
 use ttrpc::context::{self, Context};
 #[cfg(unix)]
 use ttrpc::r#async::Client;
+use tokio::time::{self, Duration};
 
 #[cfg(windows)]
 fn main() {
@@ -230,6 +231,10 @@ async fn server_send_stream(cli: streaming_ttrpc::StreamingClient) {
     while let Some(received) = stream.recv().await.unwrap() {
         assert_eq!(received.seq, seq);
         assert_eq!(received.msg, "hello");
+        if seq >= 5 {
+            println!("ctrl-c now");
+            time::sleep(Duration::from_secs(100000)).await;
+        }
         seq += 1;
     }
 }

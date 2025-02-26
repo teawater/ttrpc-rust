@@ -166,6 +166,11 @@ impl streaming_ttrpc::Streaming for StreamingService {
             e.seq = seq;
             e.msg = format!("hello");
             s.send(&e).await.unwrap();
+
+            if seq > 5 {
+                println!("this send should fail: {}", seq);
+            }
+
             seq += 1;
         }
 
